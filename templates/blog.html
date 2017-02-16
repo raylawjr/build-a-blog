@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+{% for entry in blogs %}
+    <div class="entry">
+        <div class="entry-title">{{entry.title}}</div>
+        <pre class="entry-body">{{entry.blogpost}}</pre>
+    </div>
+{% endfor %}
+{% endblock %}

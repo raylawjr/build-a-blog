@@ -20,8 +20,9 @@ import jinja2
 
 from google.appengine.ext import db
 
-template_dir = os.path,join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=True)
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
+	autoescape=True)
 
 class Handler(webapp2.RequestHandler):
 	def write(self, *a, **kw):
@@ -35,30 +36,16 @@ class Handler(webapp2.RequestHandler):
 		self.write(self.render_str(template, **kw))
 
 class Blog(db.Model):
-
-	"""
-	# This is in the database module from Google
-	# And this is how you say something is a particular type
-	# required=True sets a constraint on the database, it means that if we try to make an instance of art without giving it a title, it would give us an exception, python won't let us do that.
-	# auto_now_add=True (in 'created' below) - it automatically, when we create an instance of art, will set the created to be the current time.
-	"""
 	title = db.StringProperty(required=True)
-	postcontent = db.TextProperty(required=True)
+	blogpost = db.TextProperty(required=True)
 	created = db.DateTimeProperty(auto_now_add = True)
 
 
 class MainPage(Handler):
-	def render_front(self, title="", postlisting="", error=""):
-		"""
-		This function is created to avoid code duplication as we are going to render form using "self.render" quite a few times
-		"""
+	def render_front(self, title="", blogpost_content="", error=""):
+		blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
 
-		"""
-		Each time we render the front page, we get all the arts present in the database using the query as below (arts).
-		"""
-	    posts = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
-
-		self.render("front.html", title=title, =postlisting, error=error, posts=posts)
+		self.render("front.html", title=title, blogpost_content=blogpost_content, error=error, blogs=blogs)
 
 	def get(self):
 		# self.render("front.html")
@@ -66,20 +53,59 @@ class MainPage(Handler):
 
 	def post(self):
 		title = self.request.get('title')
-		postcontent = self.request.get('postcontent')
+		blogpost = self.request.get('blogpost')
 
-		if title and postcontent:
+		if title and blogpost:
 			# self.write('Thanks!')
 
 			# Create an instance 'a' of art object
-			a = Blog(title=title, postcontent=postcontent)
+			a = Blog(title=title, blogpost=blogpost)
 
 			# Store our new art object instance in the database
 			a.put()
 
 			self.redirect('/')
 		else:
-			error = "We need both, a title and content!"
-			self.render_front(title=title, postlisting=postcontent, error=error)
+			error = "We need both a title and content!"
+			self.render_front(title=title, blogpost_content=blogpost, error=error)
+class BlogHandler(Handler):
+    def render_blog(self, title="", blogpost_content="", error=""):
+        blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
 
-app = webapp2.WSGIApplication([('/', MainPage)], debug=True)
+        self.render("blog.html", title=title, blogpost_content=blogpost_content, error=error, blogs=blogs)
+    def get(self):
+        self.render_blog()
+
+class NewPostHandler(Handler):
+    def render_newpost(self, title="", blogpost_content="", error=""):
+        blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
+
+        self.render("newpost.html", title=title, blogpost_content=blogpost_content, error=error, blogs=blogs)
+
+    def get(self):
+		# self.render("front.html")
+		self.render_newpost()
+
+    def post(self):
+		title = self.request.get('title')
+		blogpost = self.request.get('blogpost')
+
+		if title and blogpost:
+			# self.write('Thanks!')
+
+			# Create an instance 'a' of art object
+			a = Blog(title=title, blogpost=blogpost)
+
+			# Store our new art object instance in the database
+			a.put()
+
+			self.redirect('/blog')
+		else:
+			error = "We need both a title and content!"
+			self.render_newpost(title=title, blogpost_content=blogpost, error=error)
+
+app = webapp2.WSGIApplication([
+    ('/', MainPage),
+    ('/blog', BlogHandler),
+    ('/newpost', NewPostHandler)
+], debug=True)

@@ -13,29 +13,6 @@
             Blog
         </h1>
 
-        <form method="post">
-        	<label for="">
-        		<div>title</div>
-    			<input type="text" name="title" value="{{title}}">
-    		</label>
-
-        	<label for="">
-    			<div>content</div>
-    			<textarea name="postcontent">{{postcontent}}</textarea>
-    		</label>
-        		<div class="error">{{error}}</div>
-
-        		<input type="submit">
-        	</form>
-
-        	{% for postcontent in posts %}
-        		<div class="post">
-        			<div class="post-title">{{postcontent.title}}</div>
-        			<pre class="post-body">{{postcontent.postcontent}}</pre>
-        		</div>
-        	{% endfor %}
-
-
         {% block content %}
         {% endblock %}
 
