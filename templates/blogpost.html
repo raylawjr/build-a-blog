@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-{% for entry in blogs %}
     <div class="entry">
-        <div class="entry-title"><a href= "/blog/{{entry.key().id()}}">{{entry.title}}</a></div>
+        <div class="entry-title">{{entry.title}}</a></div>
         <pre class="entry-body">{{entry.blogpost}}</pre>
     </div>
-{% endfor %}
 {% endblock %}

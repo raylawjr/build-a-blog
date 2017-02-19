@@ -42,10 +42,10 @@ class Blog(db.Model):
 
 
 class MainPage(Handler):
-	def render_front(self, title="", blogpost_content="", error=""):
+	def render_front(self, title="", blogpost="", error=""):
 		blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
 
-		self.render("front.html", title=title, blogpost_content=blogpost_content, error=error, blogs=blogs)
+		self.render("front.html", title=title, blogpost=blogpost, error=error, blogs=blogs)
 
 	def get(self):
 		# self.render("front.html")
@@ -67,20 +67,41 @@ class MainPage(Handler):
 			self.redirect('/')
 		else:
 			error = "We need both a title and content!"
-			self.render_front(title=title, blogpost_content=blogpost, error=error)
+			self.render_front(title=title, blogpost=blogpost, error=error)
 class BlogHandler(Handler):
-    def render_blog(self, title="", blogpost_content="", error=""):
+    def render_blog(self, title="", blogpost="", error=""):
         blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
 
-        self.render("blog.html", title=title, blogpost_content=blogpost_content, error=error, blogs=blogs)
+        self.render("blog.html", title=title, blogpost=blogpost, error=error, blogs=blogs)
     def get(self):
         self.render_blog()
 
+class ViewPostHandler(Handler):
+	#webap2.RequestHandler
+	def get(self, id):
+		a = int(id)
+		entry = Blog.get_by_id(a)
+		if entry == None:
+			self.response.write("No post with that id!")
+		else:
+			#self.response.write(id)
+			#self.response.write(blogentry.key().id())
+			title=""
+			blogpost=""
+			error=""
+			self.render("blogpost.html", title=title, blogpost=blogpost, error=error, entry=entry)
+		#posts = Blog.get_by_id(id)
+		#error = "Sorry, that post doesn't exist!"
+        #if Blog.get_by_id(int(id)) == None:
+		#if Post.get_by_id(int(id)) == None:
+		#	self.response.write(error)
+		#else:
+		#	self.response.write(Blog.get_by_id(int(id)))
 class NewPostHandler(Handler):
-    def render_newpost(self, title="", blogpost_content="", error=""):
+    def render_newpost(self, title="", blogpost="", error=""):
         blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
 
-        self.render("newpost.html", title=title, blogpost_content=blogpost_content, error=error, blogs=blogs)
+        self.render("newpost.html", title=title, blogpost=blogpost, error=error, blogs=blogs)
 
     def get(self):
 		# self.render("front.html")
@@ -99,13 +120,16 @@ class NewPostHandler(Handler):
 			# Store our new art object instance in the database
 			a.put()
 
-			self.redirect('/blog')
+			self.redirect('/blog/%s'%a.key().id())
 		else:
 			error = "We need both a title and content!"
 			self.render_newpost(title=title, blogpost_content=blogpost, error=error)
 
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/blog', BlogHandler),
-    ('/newpost', NewPostHandler)
+    ('/newpost', NewPostHandler),
+	webapp2.Route('/blog/<id:\d+>', ViewPostHandler),
+
 ], debug=True)
