@@ -123,7 +123,7 @@ class NewPostHandler(Handler):
 			self.redirect('/blog/%s'%a.key().id())
 		else:
 			error = "We need both a title and content!"
-			self.render_newpost(title=title, blogpost_content=blogpost, error=error)
+			self.render_newpost(title=title, blogpost=blogpost, error=error)
 
 
 app = webapp2.WSGIApplication([
