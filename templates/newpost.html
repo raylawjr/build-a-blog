@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <form method="post">
-
+    <div>Make a new blog post!</div>
     <label for="">
+        <br>
         <div>title</div>
         <input type="text" name="title" value="{{title}}">
     </label>
@@ -16,4 +17,4 @@
 
     <input type="submit">
 </form>
-{% endblock %}
+{% endblock content %}
